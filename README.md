@@ -6,6 +6,9 @@
 2. Ensure you can access AWS.
 3. Verify that you have full access to EKS.
 
+## Lab infrastructure and deploy process introduce
+1. 
+
 ## Initialize the lab
 
 1. Rewrite the "Owner" variable tag in the `variables.tf` file.
@@ -16,6 +19,7 @@
 or
 AWS_PROFILE=test ./init.sh
 ```
+
 
 ## TASK 1: Learn how to deploy Fluent Bit configuration using Terraform
 
