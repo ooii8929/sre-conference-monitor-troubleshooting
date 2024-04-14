@@ -11,7 +11,7 @@
 
 ## Initialize the lab
 
-1. Rewrite the "Owner" variable tag in the `variables.tf` file.
+1. Rewrite the "owner" and "region" variable tag in the `variables.tf` file.
 2. Run the following script file, which will build a new EKS cluster and deploy the applications required for the lab:
 
 ```

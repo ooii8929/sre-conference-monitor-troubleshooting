@@ -2,16 +2,16 @@ locals {
   project_name = "monitor-troubleshooting"
 }
 
-variable "owner" {
-  description = "The owner of the resources"
-  default     = "AlvinLin"
+variable "region" {
+  type        = string
+  description = "The AWS region"
 }
 
-variable "region" {
-  default     = "ap-northeast-1"
-  description = "aws region"
+variable "owner" {
   type        = string
+  description = "The owner of the resources"
 }
+
 
 variable "project" {
   default     = "prism"
