@@ -7,7 +7,34 @@
 3. Verify that you have full access to EKS.
 
 ## Lab infrastructure and deploy process introduce
-1. 
+1. Below is the infrastructure
+```
+ tree -L 2
+.
+├── README.md
+├── ec2.tf
+├── eks.tf
+├── main.tf
+├── network.tf
+├── utilities
+│   ├── destroy.sh
+│   ├── init.sh
+│   └── remove.sh
+├── resource-management
+│   ├── data.tf
+│   ├── helm_release.tf
+│   ├── init-es
+│   ├── provider.tf
+│   ├── secret.yaml
+│   ├── values
+│   └── variables.tf
+└── variables.tf
+
+
+```
+1. The root folder is for deploying EKS infrastructure and VPC network.
+2. The resource-management folder is for deploying applications, such as Elasticsearch and Kibana.
+
 
 ## Initialize the lab
 
@@ -31,11 +58,17 @@ Use the following command to check if the Fluent Bit configuration is set to sen
 kubectl -n kube-system describe configmap aws-cloudwatch-logs-aws-for-fluent-bit
 ```
 
+ref: 
+1. artifacthub-elasticsearch[https://artifacthub.io/packages/helm/elastic/elasticsearch]
+2. 
+
 ## TASK 2: Learn how to debug the logs system
 
 ### Your target
 
-There are no data displayed in Kibana, which is not correct. Please check the network, logs, and settings to find out and ensure Kibana receives data from the logs-generator and filters only to display 404 errors.
+There are no data displayed in Kibana, which is not correct. 
+
+Please check the network, logs, and settings to find out and ensure Kibana receives data from the logs-generator and filters only to display 404 errors.
 
 Below is the port-forward command that can expose Kibana, and you can connect to it at `http://localhost:8080`:
 
@@ -43,8 +76,19 @@ Below is the port-forward command that can expose Kibana, and you can connect to
 kubectl -n kube-system port-forward <kibana pod name> 8080:5601
 ```
 
-## Clean up the lab
+### Check Points
+1. Only 404 errors can be found in Kibana.
 
+## Task 3: Learn how to deprecated the outdated technology/config
+
+### Your target
+1. The current ElasticSearch and kibana version is 7.17.3. It is recommended to upgrade it to 8.5.1.
+2. An important reminder for ElasticSearch version 8.5.1 is that certificates can be auto-created. Therefore, you may need to adjust some settings related to TLS connections.
+
+### Check Points
+1. By using the command `helm list -n kube-system`, you can see that both ElasticSearch and Kibana versions are 8.5.1.
+
+## Clean up the lab
 ```
 ./destroy.sh
 or

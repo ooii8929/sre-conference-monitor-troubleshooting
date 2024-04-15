@@ -2,7 +2,7 @@ resource "helm_release" "elasticsearch" {
   name       = "elasticsearch"
   repository = "https://helm.elastic.co"
   chart      = "elasticsearch"
-  version    = "8.5.1"
+  version    = "7.17.3"
   namespace  = "kube-system"
   values = [
     file("./values/elasticsearch/value.yaml")
@@ -13,8 +13,11 @@ resource "helm_release" "kibana" {
   name       = "kibana"
   repository = "https://helm.elastic.co"
   chart      = "kibana"
-  version    = "8.5.1"
+  version    = "7.17.3"
   namespace  = "kube-system"
+  values = [
+    file("./values/kibana/value.yaml")
+  ]
 
   depends_on = [
     helm_release.elasticsearch

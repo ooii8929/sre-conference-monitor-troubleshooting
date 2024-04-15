@@ -337,7 +337,7 @@ volumes:
       path: /var/lib/docker/containers
   - name: elasticsearch-master-certs
     secret:
-      secretName: elasticsearch-master-certs
+      secretName: elastic-certificate-crt
 
 volumeMounts:
   - name: varlog

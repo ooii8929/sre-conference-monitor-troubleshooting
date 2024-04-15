@@ -7,35 +7,33 @@ nodeGroup: "master"
 masterService: ""
 
 # Elasticsearch roles that will be applied to this nodeGroup
-# These will be set as environment variables. E.g. node.roles=master
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#node-roles
+# These will be set as environment variables. E.g. node.master=true
 roles:
-  - master
-  - data
-  - data_content
-  - data_hot
-  - data_warm
-  - data_cold
-  - ingest
-  - ml
-  - remote_cluster_client
-  - transform
+  master: "true"
+  ingest: "true"
+  data: "true"
+  remote_cluster_client: "true"
+  ml: "true"
 
 replicas: 2
 minimumMasterNodes: 2
 
 esMajorVersion: ""
 
+clusterDeprecationIndexing: "false"
+
 # Allows you to add any config files in /usr/share/elasticsearch/config/
 # such as elasticsearch.yml and log4j2.properties
-esConfig: {}
-#  elasticsearch.yml: |
-#    key:
-#      nestedkey: value
-#  log4j2.properties: |
-#    key = value
-
-createCert: true
+esConfig: 
+  elasticsearch.yml: |
+    xpack.security.enabled: true
+    xpack.security.transport.ssl.enabled: true
+    xpack.security.transport.ssl.verification_mode: certificate
+    xpack.security.transport.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
+    xpack.security.transport.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
+    xpack.security.http.ssl.enabled: true
+    xpack.security.http.ssl.truststore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
+    xpack.security.http.ssl.keystore.path: /usr/share/elasticsearch/config/certs/elastic-certificates.p12
 
 esJvmOptions: {}
 #  processors.options: |
@@ -44,10 +42,12 @@ esJvmOptions: {}
 # Extra environment variables to append to this nodeGroup
 # This will be appended to the current 'env:' key. You can use any of the kubernetes env
 # syntax here
-extraEnvs: []
-#  - name: MY_ENVIRONMENT_VAR
-#    value: the_value_goes_here
-
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elastic-credentials
+        key: password
 # Allows you to load environment variables from kubernetes secret or config map
 envFrom: []
 # - secretRef:
@@ -55,20 +55,14 @@ envFrom: []
 # - configMapRef:
 #     name: config-map
 
-# Disable it to use your own elastic-credential Secret.
-secret:
-  enabled: true
-  password: "ul8x5B01s5kf3sk" # generated randomly if not defined
-
 # A list of secrets and their paths to mount inside the pod
 # This is useful for mounting certificates for security and for mounting
 # the X-Pack license
-secretMounts: []
-#  - name: elastic-certificates
-#    secretName: elastic-certificates
-#    path: /usr/share/elasticsearch/config/certs
-#    defaultMode: 0755
-
+secretMounts:
+  - name: elastic-certificates
+    secretName: elastic-certificates
+    path: /usr/share/elasticsearch/config/certs
+    
 hostAliases: []
 #- ip: "127.0.0.1"
 #  hostnames:
@@ -76,11 +70,12 @@ hostAliases: []
 #  - "bar.local"
 
 image: "docker.elastic.co/elasticsearch/elasticsearch"
-imageTag: "8.5.1"
+imageTag: "7.17.3"
 imagePullPolicy: "IfNotPresent"
 
-podAnnotations: {}
-# iam.amazonaws.com/role: es-cluster
+podAnnotations:
+  {}
+  # iam.amazonaws.com/role: es-cluster
 
 # additionals labels
 labels: {}
@@ -95,13 +90,14 @@ resources:
     cpu: "1000m"
     memory: "2Gi"
 
-initResources: {}
-# limits:
-#   cpu: "25m"
-#   # memory: "128Mi"
-# requests:
-#   cpu: "25m"
-#   memory: "128Mi"
+initResources:
+  {}
+  # limits:
+  #   cpu: "25m"
+  #   # memory: "128Mi"
+  # requests:
+  #   cpu: "25m"
+  #   memory: "128Mi"
 
 networkHost: "0.0.0.0"
 
@@ -143,24 +139,28 @@ persistence:
     enabled: false
   annotations: {}
 
-extraVolumes: []
-# - name: extras
-#   emptyDir: {}
+extraVolumes:
+  []
+  # - name: extras
+  #   emptyDir: {}
 
-extraVolumeMounts: []
-# - name: extras
-#   mountPath: /usr/share/extras
-#   readOnly: true
+extraVolumeMounts:
+  []
+  # - name: extras
+  #   mountPath: /usr/share/extras
+  #   readOnly: true
 
-extraContainers: []
-# - name: do-something
-#   image: busybox
-#   command: ['do', 'something']
+extraContainers:
+  []
+  # - name: do-something
+  #   image: busybox
+  #   command: ['do', 'something']
 
-extraInitContainers: []
-# - name: do-something
-#   image: busybox
-#   command: ['do', 'something']
+extraInitContainers:
+  []
+  # - name: do-something
+  #   image: busybox
+  #   command: ['do', 'something']
 
 # This is the PriorityClass settings as defined in
 # https://kubernetes.io/docs/concepts/configuration/pod-priority-preemption/#priorityclass
@@ -238,7 +238,7 @@ readinessProbe:
   successThreshold: 3
   timeoutSeconds: 5
 
-# https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html#request-params wait_for_status
+# https://www.elastic.co/guide/en/elasticsearch/reference/7.17/cluster-health.html#request-params wait_for_status
 clusterHealthCheckParams: "wait_for_status=green&timeout=1s"
 
 ## Use an alternate scheduler.
@@ -272,25 +272,26 @@ nameOverride: ""
 fullnameOverride: ""
 healthNameOverride: ""
 
-lifecycle: {}
-# preStop:
-#   exec:
-#     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
-# postStart:
-#   exec:
-#     command:
-#       - bash
-#       - -c
-#       - |
-#         #!/bin/bash
-#         # Add a template to adjust number of shards/replicas
-#         TEMPLATE_NAME=my_template
-#         INDEX_PATTERN="logstash-*"
-#         SHARD_COUNT=8
-#         REPLICA_COUNT=1
-#         ES_URL=http://localhost:9200
-#         while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
-#         curl -XPUT "$ES_URL/_template/$TEMPLATE_NAME" -H 'Content-Type: application/json' -d'{"index_patterns":['\""$INDEX_PATTERN"\"'],"settings":{"number_of_shards":'$SHARD_COUNT',"number_of_replicas":'$REPLICA_COUNT'}}'
+lifecycle:
+  {}
+  # preStop:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message"]
+  # postStart:
+  #   exec:
+  #     command:
+  #       - bash
+  #       - -c
+  #       - |
+  #         #!/bin/bash
+  #         # Add a template to adjust number of shards/replicas
+  #         TEMPLATE_NAME=my_template
+  #         INDEX_PATTERN="logstash-*"
+  #         SHARD_COUNT=8
+  #         REPLICA_COUNT=1
+  #         ES_URL=http://localhost:9200
+  #         while [[ "$(curl -s -o /dev/null -w '%{http_code}\n' $ES_URL)" != "200" ]]; do sleep 1; done
+  #         curl -XPUT "$ES_URL/_template/$TEMPLATE_NAME" -H 'Content-Type: application/json' -d'{"index_patterns":['\""$INDEX_PATTERN"\"'],"settings":{"number_of_shards":'$SHARD_COUNT',"number_of_replicas":'$REPLICA_COUNT'}}'
 
 sysctlInitContainer:
   enabled: true
@@ -319,7 +320,6 @@ networkPolicy:
     #     role: frontend
     #   matchExpressions:
     #     - {key: role, operator: In, values: [frontend]}
-
     ## Additional NetworkPolicy Ingress "from" rules to set. Note that all rules are OR-ed.
     ##
     # additionalRules:
@@ -354,3 +354,7 @@ networkPolicy:
 
 tests:
   enabled: true
+
+# Deprecated
+# please use the above podSecurityContext.fsGroup instead
+fsGroup: ""
