@@ -12,6 +12,8 @@ root_dir=$(pwd)
 "$script_dir"/remove-deprecated-es.sh
 
 cd "$root_dir"/resource-management
+terraform init
 terraform destroy -auto-approve -var-file="$root_dir/variables.tfvars"
 cd "$root_dir"
+terraform init
 terraform destroy -auto-approve -var-file="$root_dir/variables.tfvars"
