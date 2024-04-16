@@ -13,12 +13,6 @@ variable "owner" {
 }
 
 
-variable "project" {
-  default     = "prism"
-  description = "name of the project"
-  type        = string
-}
-
 variable "kube_config" {
   type    = string
   default = "~/.kube/config"
