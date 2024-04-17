@@ -71,7 +71,7 @@ There are no data displayed in Kibana, which is not correct.
 
 Please check the network, logs, and settings to find out and ensure Kibana receives data from the logs-generator and filters only to display 404 errors.
 
-Below is the port-forward command that can expose Kibana, and you can connect to it at `http://localhost:8080`:
+Below is the port-forward command that can expose Kibana, and you can connect to it at `https://localhost:8080`:
 
 ```
 kubectl -n kube-system port-forward <kibana pod name> 8080:5601
