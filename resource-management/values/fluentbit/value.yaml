@@ -39,6 +39,7 @@ service:
     HC_Errors_Count 5 
     HC_Retry_Failure_Count 5 
     HC_Period 5 
+    Log_Level     debug
 
   parsersFiles:
     - /fluent-bit/parsers/parsers.conf
@@ -91,7 +92,7 @@ additionalFilters: |
   [FILTER]
       Name grep
       Match kube.*
-      Regex message 404
+      Regex log 404
 
 cloudWatch:
   enabled: false
@@ -273,16 +274,19 @@ additionalOutputs: |
       Port            9200
       AWS_Auth        Off
       TLS             On
-      tls.verify     On
-      Retry_Limit     6
+      tls.verify      On
+      Retry_Limit     false
       HTTP_User       elastic
-      HTTP_Passwd     ul8x5B01s5kf3sk
-      Index           ${local.project_name}-application-logs-%Y.%W
-      Suppress_Type_Name On
-      tls.ca_file /fluentd/elastic/ca.crt
-      tls.crt_file /fluentd/elastic/tls.crt
-      tls.key_file /fluentd/elastic/tls.key 
-      
+      HTTP_Passwd     vmVhOB4Pn0wRvQO6xEgj
+      Index           application-logs-%Y.%W
+      tls.ca_file /usr/share/fluentbit/config/certs/elastic-certificate.pem
+      Replace_Dots On
+
+  [OUTPUT]
+      Name file
+      Match *
+      Path tmp    
+
 serviceAccount:
   create: true
   annotations: {}
@@ -322,7 +326,17 @@ annotations:
 hostNetwork: false
 dnsPolicy: ClusterFirst
 
-env: []
+env: 
+  - name: 'ELASTICSEARCH_USERNAME'
+    valueFrom:
+      secretKeyRef:
+        name: elastic-credentials
+        key: username
+  - name: 'ELASTICSEARCH_PASSWORD'
+    valueFrom:
+      secretKeyRef:
+        name: elastic-credentials
+        key: password
 ## To add extra environment variables to the pods, add as below
 # env:
 #   - name: AWS_REGION
@@ -350,6 +364,14 @@ volumes:
   - name: elasticsearch-master-certs
     secret:
       secretName: elastic-certificate-crt
+  - name: elastic-certificate-pem
+    secret:
+      secretName: elastic-certificate-pem
+  - name: elastic-certificates
+    secret:
+      secretName: elastic-certificates
+
+      
 
 volumeMounts:
   - name: varlog
@@ -360,6 +382,13 @@ volumeMounts:
   - name: elasticsearch-master-certs
     readOnly: true
     mountPath: /fluentd/elastic/
+  - name: elastic-certificate-pem
+    readOnly: true
+    mountPath: /usr/share/fluentbit/config/certs
+  - name: elastic-certificates
+    readOnly: true
+    mountPath: /fluentd/ca/
+
 
 # For livenessProbe to work - service.extraService must also enable Health_Check On
 livenessProbe:

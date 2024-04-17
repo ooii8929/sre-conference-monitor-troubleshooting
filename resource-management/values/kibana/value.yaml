@@ -9,17 +9,17 @@ replicas: 1
 extraEnvs:
   - name: "NODE_OPTIONS"
     value: "--max-old-space-size=1800"
-  - name: ELASTICSEARCH_USERNAME
+  - name: 'ELASTICSEARCH_USERNAME'
     valueFrom:
       secretKeyRef:
         name: elastic-credentials
         key: username
-  - name: ELASTICSEARCH_PASSWORD
+  - name: 'ELASTICSEARCH_PASSWORD'
     valueFrom:
       secretKeyRef:
         name: elastic-credentials
         key: password
-  - name: KIBANA_ENCRYPTION_KEY
+  - name: 'KIBANA_ENCRYPTION_KEY'
     valueFrom:
       secretKeyRef:
         name: kibana

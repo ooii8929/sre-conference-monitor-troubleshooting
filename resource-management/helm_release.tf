@@ -30,7 +30,7 @@ resource "helm_release" "aws_cloudwatch_logs_for_fluent_bit" {
   name       = "aws-cloudwatch-logs"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-for-fluent-bit"
-  version    = "0.1.26"
+  version    = "0.1.32"
   namespace  = "kube-system"
 
   values = [
@@ -49,7 +49,7 @@ resource "helm_release" "aws_cloudwatch_logs_for_fluent_bit" {
     name  = "kinesis.enabled"
     value = "false"
   }
- 
+  
   depends_on = [
     helm_release.kibana
   ]

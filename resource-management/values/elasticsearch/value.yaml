@@ -201,7 +201,7 @@ service:
   publishNotReadyAddresses: false
   nodePort: ""
   annotations: {}
-  httpPortName: http
+  httpPortName: https
   transportPortName: transport
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
@@ -233,7 +233,7 @@ sysctlVmMaxMapCount: 262144
 
 readinessProbe:
   failureThreshold: 3
-  initialDelaySeconds: 10
+  initialDelaySeconds: 200
   periodSeconds: 10
   successThreshold: 3
   timeoutSeconds: 5

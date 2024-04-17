@@ -5,7 +5,7 @@ include ./helpers/examples.mk
 RELEASE := helm-es-security
 ELASTICSEARCH_IMAGE := docker.elastic.co/elasticsearch/elasticsearch:$(STACK_VERSION)
 TIMEOUT := 1200s
-ELASTIC_PASSWORD := ul8x5B01s5kf3sk
+ELASTIC_PASSWORD := vmVhOB4Pn0wRvQO6xEgj
 
 install:
 	helm upgrade --wait --timeout=$(TIMEOUT) --install --values values.yaml $(RELEASE) ../../
@@ -24,7 +24,7 @@ secrets:
 	rm -f elastic-certificates.p12 elastic-certificate.pem elastic-certificate.crt elastic-stack-ca.p12 || true
 	encryptionkey=$$(docker run --rm busybox:1.31.1 /bin/sh -c "< /dev/urandom tr -dc _A-Za-z0-9 | head -c40") && \
 	kubectl -n kube-system create secret generic kibana --from-literal=encryptionkey=$$encryptionkey && \
-	password=$$([ ! -z "$$ELASTIC_PASSWORD" ] && echo $$ELASTIC_PASSWORD || echo $$(docker run --rm busybox:1.31.1 /bin/sh -c "< /dev/urandom tr -cd '[:alnum:]' | head -c20")) && \
+	password=$$([ ! -z "$(ELASTIC_PASSWORD)" ] && echo $(ELASTIC_PASSWORD) || echo $$(docker run --rm busybox:1.31.1 /bin/sh -c "< /dev/urandom tr -cd '[:alnum:]' | head -c20")) && \
 	docker run --name elastic-helm-charts-certs -i -w /app \
 		$(ELASTICSEARCH_IMAGE) \
 		/bin/sh -c " \
