@@ -3,74 +3,37 @@ Task2 的任務主要目標是讓學員知道 EFK logs 沒有正常被傳輸時�
 1. 使用 'kubectl -n kube-system port-forward <pod name> 8080:5601' 進行對外曝光連線
 2. 在瀏覽器打開 'https://localhost:8080/'，並從 Makefile 內找到 password vmVhOB4Pn0wRvQO6xEgj 進行登入。
 3. 可以看到畫面提到你可以將 data 送進來。這代表 data 沒有成功送到 elastic Search
-2. 為了找出原因
-3. 將 /Tasks/task1 的 filter ，補在 additionalFilters 後方
+4. 為了找出原因，我們將 output 先改成傳到 local tmp folder 下[https://docs.fluentbit.io/manual/pipeline/outputs/file]
 ```
-additionalFilters: |
-  [FILTER]
-      Name grep
-      Match kube.*
-      Regex message 404
+ [OUTPUT]
+      Name file
+      Match *
+      Path tmp   
 ```
-4. 將 /Tasks/task1 的 output ，補在 additionalOutputs 後方
+5. 確認並沒有傳到，我們改成將 filter 拔掉，看看是哪一段出問題，發現 filter 拔掉 logs 就出來了
+6. 使用指令進入 fluent bit container 內，我們發現 logs 的 key 不是 message，而是 log
 ```
-additionalOutputs: |
-    [OUTPUT]
-        Name            es
-        Match           kube.*
-        Host            elasticsearch-master.kube-system.svc.cluster.local
-        Port            9200
-        AWS_Auth        Off
-        TLS             On
-        tls.verify      On
-        Retry_Limit     6
-        HTTP_User       elastic
-        HTTP_Passwd     vmVhOB4Pn0wRvQO6xEgj
-        Index           ${local.project_name}-application-logs-%Y.%W
-        tls.ca_file /usr/share/fluentbit/config/certs/elastic-certificate.pem
+k exec -it <fluent bit logs> -n kube-system bash
+cd tmp
+ls
 ```
-
-5. (承3 & 4) 將 /Tasks/task1 的 output ，寫在 helm_release.tf 也可以
+7. 將 filter 改成 log
 ```
-resource "helm_release" "fluent_bit" {
-  name       = "fluent_bit"
-  repository = "https://aws.github.io/eks-charts"
-  chart      = "aws-for-fluent-bit"
-
-  set {
-    name  = "additionalFilters"
-    value = <<-EOT
-        [FILTER]
-            Name grep
-            Match kube.*
-            Regex message 404
-    EOT
-  }
-
- 
-  set {
-    name  = "additionalOutputs"
-    value = <<-EOT
-        [OUTPUT]
-            Name            es
-            Match           kube.*
-            Host            elasticsearch-master.kube-system.svc.cluster.local
-            Port            9200
-            AWS_Auth        Off
-            TLS             On
-            tls.verify      On
-            Retry_Limit     6
-            HTTP_User       elastic
-            HTTP_Passwd     vmVhOB4Pn0wRvQO6xEgj
-            Index           ${local.project_name}-application-logs-%Y.%W
-            tls.ca_file /usr/share/fluentbit/config/certs/elastic-certificate.pem
-    EOT
-  }
- 
-}
+[FILTER]
+    Name grep
+    Match kube.*
+    Regex log 404
 ```
-6. Terraform apply 部署
+8. logs 成功傳送到 container 內，但 ElasticSearch 還是沒收到，查看logs發現
 ```
-cd resource-management
-terraform apply -var-file="../variables.tfvars"
+[2024/04/17 23:44:00] [ warn] [engine] failed to flush chunk '1-1713397401.47804154.flb', retry in 17 seconds: task_id=2, input=tail.0 > output=es.1 (out_id=1)
 ```
+9. 但這個 logs 無法幫忙找到 root cause，所以我們必須新增 trace_error[https://docs.fluentbit.io/manual/v/dev-2.2/pipeline/outputs/elasticsearch]
+```
+Trace_Error On
+```
+10. 發現問題在 index 有異常變數，導致空值，間接導致開頭是 '-'，不符合設定
+```
+{"took":0,"errors":true,"items":[{"create":{"_index":"-application-logs-2024.16","_type":"_doc","_id":null,"status":400,"error":{"type":"invalid_index_name_exception","reason":"Invalid index name [-application-logs-2024.16], must not start with '_', '-', or '+'","index_uuid":"_na_","index":"-application-logs-2024.16"}}},{"create":{"_index":"-application-logs-2024.16","_type":"_doc","_id":null,"status":400,"error":{"type":"invalid_index_name_exception","reason":"Invalid index name [-application-logs-2024.16], must not start with '_', '-', or '+'","index_uuid":"_na_","index":"-application-logs-2024.16"}}},{"create":{"_index":"-application-logs-2024.16","_type":"_doc","_id":null,"status":400,"error":{"type":"invalid_index_name_exception","reason":"Invalid index name [-application-logs-2024.16], must not start with '_', '-', or '+'","index_uuid":"_na_","index":"-application-logs-2024.16"}}},{"create":{"_index":"-application-logs-2024.16","_type":"_doc","_id":null,"status":400,"error":{"type":"invalid_index_name_exception","reason":"Invalid index name [-application-logs-2024.16], must not start with '_', '-', or '+'","index_uuid":"_na_","index":"-application-logs-2024.16"}}}]}
+```
+11. 將變數移除，即可收到正確資訊
