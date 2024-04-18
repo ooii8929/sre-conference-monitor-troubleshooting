@@ -16,15 +16,12 @@
     Port            9200
     AWS_Auth        Off
     TLS             On
-    tls.verify     On
+    tls.verify      On
     Retry_Limit     6
     HTTP_User       elastic
-    HTTP_Passwd     ul8x5B01s5kf3sk
+    HTTP_Passwd     vmVhOB4Pn0wRvQO6xEgj
     Index           ${local.project_name}-application-logs-%Y.%W
-    Suppress_Type_Name On
-    tls.ca_file /fluentd/elastic/ca.crt
-    tls.crt_file /fluentd/elastic/tls.crt
-    tls.key_file /fluentd/elastic/tls.key 
+    tls.ca_file /usr/share/fluentbit/config/certs/elastic-certificate.pem
 ```
 
 
