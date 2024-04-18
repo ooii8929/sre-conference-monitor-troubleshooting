@@ -1,7 +1,9 @@
-Task1 的任務主要目標是讓學員剛開始這個 Lab，能夠掌握使用 Terraform 部署 Application 到 EKS 的方法。
+Task2 的任務主要目標是讓學員知道 EFK logs 沒有正常被傳輸時，應該如何 debug，這篇我們埋了兩個階段的錯誤，第一個是 filter 抓錯。Filter 是將 input 進來的 logs 再進行篩選的一層 layer，正常來說，我們應該要從 input 觀察 logs 正確是長怎樣，然後再進行 filter，只是如果你是經手專案，很容易就將config直接複製貼上(正如我們第一題的狀況一樣)。為了確認 input - filter - output 是否有正常運行，我們可以借用官網的 local output 的方式，確認在排除因為output連線、驗證等問題的狀況外，logs 是否有正常產出。第二個難題是儘管 output 有正確出來，但卻傳不到 elasticSearch，當我們遇到類似問題，最好的方式就是找出 logs，但預設的 logs 沒能提供足夠的資訊給我們。所以我們要善用官方提供的 trace error 參數。
 
-1. 從 https://artifacthub.io/packages/helm/aws/aws-for-fluent-bit 得知有 parameters additionalFilters & additionalOutputs 能夠直接對 FluentBit 調整設定
-2. 從 helm_release.tf 可以看到我們將變數 file 拉出來設定
+1. 使用 'kubectl -n kube-system port-forward <pod name> 8080:5601' 進行對外曝光連線
+2. 在瀏覽器打開 'https://localhost:8080/'，並從 Makefile 內找到 password vmVhOB4Pn0wRvQO6xEgj 進行登入。
+3. 可以看到畫面提到你可以將 data 送進來。這代表 data 沒有成功送到 elastic Search
+2. 為了找出原因
 3. 將 /Tasks/task1 的 filter ，補在 additionalFilters 後方
 ```
 additionalFilters: |
@@ -71,8 +73,4 @@ resource "helm_release" "fluent_bit" {
 ```
 cd resource-management
 terraform apply -var-file="../variables.tfvars"
-```
-7. 藉由指令確認是否將 config 如預期的進行更改
-```
-kubectl -n kube-system describe configmap aws-cloudwatch-logs-aws-for-fluent-bit
 ```
