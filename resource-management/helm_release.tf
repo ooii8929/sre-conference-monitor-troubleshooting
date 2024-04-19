@@ -62,7 +62,7 @@ resource "helm_release" "log-generator" {
   version    = "0.1.20"
 
   depends_on = [
-    helm_release.aws_cloudwatch_logs_for_fluent_bit
+    helm_release.fluent_bit
   ]
 }
 
