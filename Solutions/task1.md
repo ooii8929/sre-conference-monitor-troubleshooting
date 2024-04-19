@@ -74,5 +74,5 @@ terraform apply -var-file="../variables.tfvars"
 ```
 7. 藉由指令確認是否將 config 如預期的進行更改
 ```
-kubectl -n kube-system describe configmap aws-cloudwatch-logs-aws-for-fluent-bit
+kubectl -n kube-system describe configmap fluent-bit
 ```
