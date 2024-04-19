@@ -26,8 +26,8 @@ resource "helm_release" "kibana" {
 }
 
 
-resource "helm_release" "fluent_bit" {
-  name       = "fluent_bit"
+resource "helm_release" "fluent-bit" {
+  name       = "fluent-bit"
   repository = "https://aws.github.io/eks-charts"
   chart      = "aws-for-fluent-bit"
   version    = "0.1.32"
@@ -62,7 +62,7 @@ resource "helm_release" "log-generator" {
   version    = "0.1.20"
 
   depends_on = [
-    helm_release.fluent_bit
+    helm_release.fluent-bit
   ]
 }
 
