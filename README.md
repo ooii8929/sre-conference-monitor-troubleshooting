@@ -13,7 +13,7 @@ You can use ./utilities/check_requirements.sh to check if your settings match th
 1. Check if you have installed AWS CLI, Terraform, Helm, and kubectl.
 2. Ensure you can access AWS.
 3. Verify that you have full access to EKS.
-4. docker daemon!!!!!
+4. docker!!!!!
 
 
 ## Lab infrastructure and deploy process introduce
