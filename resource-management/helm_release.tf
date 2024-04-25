@@ -67,9 +67,9 @@ resource "helm_release" "fluent-bit" {
 
 resource "helm_release" "log-generator" {
   name       = "log-generator"
-  repository = "https://kubernetes-charts.banzaicloud.com"
+  repository = "https://kube-logging.github.io/helm-charts"
   chart      = "log-generator"
-  version    = "0.1.20"
+  version    = "0.6.0"
 
   depends_on = [
     helm_release.fluent-bit
