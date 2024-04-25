@@ -88,48 +88,53 @@ filter:
 #    Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 #    Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
 
-additionalFilters: 
 
-cloudWatch:
-  enabled: false
-  match: "*"
-  region: "ap-northeast-1"
-  logGroupName: "/aws/eks/fluentbit-cloudwatch/logs"
-  logStreamName:
-  logStreamPrefix: "fluentbit-"
-  logKey:
-  logFormat:
-  logRetentionDays:
-  roleArn:
-  autoCreateGroup: true
-  endpoint:
-  credentialsEndpoint: {}
-  # extraOutputs: |
-  #   ...
+additionalFilters: |
+  [FILTER]
+      Name grep
+      Match kube.*
+      Regex log 404
 
-cloudWatchLogs:
-  enabled: true
-  match: "*"
-  region: "ap-northeast-1"
-  logGroupName: "/aws/eks/fluentbit-cloudwatch/logs"
-  logGroupTemplate: # /aws/eks/fluentbit-cloudwatch/workload/$kubernetes['namespace_name']
-  logStreamName:
-  logStreamPrefix: "fluentbit-"
-  logStreamTemplate: # $kubernetes['pod_name'].$kubernetes['container_name']
-  logKey:
-  logFormat:
-  roleArn:
-  autoCreateGroup: true
-  logRetentionDays:
-  endpoint:
-  metricNamespace:
-  metricDimensions:
-  stsEndpoint:
-  autoRetryRequests:
-  externalId:
-  # extraOutputs: |
-  #  log_format json/emf
-  #  worker 1
+# cloudWatch:
+#   enabled: false
+#   match: "*"
+#   region: "ap-northeast-1"
+#   logGroupName: "/aws/eks/fluentbit-cloudwatch/logs"
+#   logStreamName:
+#   logStreamPrefix: "fluentbit-"
+#   logKey:
+#   logFormat:
+#   logRetentionDays:
+#   roleArn:
+#   autoCreateGroup: true
+#   endpoint:
+#   credentialsEndpoint: {}
+#   # extraOutputs: |
+#   #   ...
+
+# cloudWatchLogs:
+#   enabled: true
+#   match: "*"
+#   region: "ap-northeast-1"
+#   logGroupName: "/aws/eks/fluentbit-cloudwatch/logs"
+#   logGroupTemplate: # /aws/eks/fluentbit-cloudwatch/workload/$kubernetes['namespace_name']
+#   logStreamName:
+#   logStreamPrefix: "fluentbit-"
+#   logStreamTemplate: # $kubernetes['pod_name'].$kubernetes['container_name']
+#   logKey:
+#   logFormat:
+#   roleArn:
+#   autoCreateGroup: true
+#   logRetentionDays:
+#   endpoint:
+#   metricNamespace:
+#   metricDimensions:
+#   stsEndpoint:
+#   autoRetryRequests:
+#   externalId:
+#   # extraOutputs: |
+#   #  log_format json/emf
+#   #  worker 1
 
 firehose:
   enabled: false
@@ -262,7 +267,26 @@ opensearch:
   suppressTypeName: "On"
   # extraOutputs: |
 
-additionalOutputs: 
+additionalOutputs: |
+  [OUTPUT]
+      Name            es
+      Match           kube.*
+      Host            elasticsearch-master.kube-system.svc.cluster.local
+      Port            9200
+      AWS_Auth        Off
+      TLS             On
+      tls.verify      On
+      Retry_Limit     false
+      HTTP_User       elastic
+      HTTP_Passwd     vmVhOB4Pn0wRvQO6xEgj
+      Index           application-logs-%Y.%W
+      tls.ca_file /usr/share/fluentbit/config/certs/elastic-certificate.pem
+      Replace_Dots On
+
+  [OUTPUT]
+      Name file
+      Match *
+      Path tmp 
 
 serviceAccount:
   create: true
