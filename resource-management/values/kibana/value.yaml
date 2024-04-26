@@ -49,7 +49,6 @@ hostAliases: []
 #  - "bar.local"
 
 image: "docker.elastic.co/kibana/kibana"
-imageTag: "7.17.3"
 imagePullPolicy: "IfNotPresent"
 
 # additionals labels
@@ -160,12 +159,18 @@ ingress:
   className: "nginx"
   pathtype: ImplementationSpecific
   annotations: {}
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
+  kubernetes.io/ingress.class: nginx
+  kubernetes.io/tls-acme: "true"
   hosts:
-    - host: localhost
+    - host: 
       paths:
-        - path: /
+        - path: 
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: kibana-kibana
+              port:
+                number: 5601
 
 # ingress:
 #   enabled: false
