@@ -1,10 +1,6 @@
 # SRE Conference Lab - Learn how to deploy and upgrade a logs system
 
-此 Lab 是為了讓剛進入職場的 SRE 工程師能夠快速掌握 Terraform 及 EFK debug 流程而設計的。Lab 中模擬作者實際在職場上遇到必須將 EFK 進行升級時遇到的問題復現出來。其中包含了
-20% Terrform 應用
-20% EFK debug 
-30% EKS TLS 概念
-30% 升級時注意事項
+此 Lab 是為了讓剛進入職場的 SRE 工程師能夠快速掌握 Terraform 及 EFK debug 流程而設計的。Lab 中模擬作者實際在職場上遇到必須將 EFK 進行升級時遇到的問題復現出來。
 
 ## Prerequisites
 
