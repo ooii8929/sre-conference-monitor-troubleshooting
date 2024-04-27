@@ -31,7 +31,7 @@ module "eks" {
         additional = aws_iam_policy.additional.arn
       }
 
-      instance_types = ["t3.large"]
+      instance_types = ["t3.medium"]
       capacity_type  = "ON_DEMAND"
     }
   } 
