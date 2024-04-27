@@ -38,6 +38,11 @@ resource "helm_release" "fluent-bit" {
   ]
 
   set {
+    name  = "cloudWatch.enabled"
+    value = "false"
+  }
+
+  set {
     name  = "rbac.pspEnabled"
     value = "false"
   }
