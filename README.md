@@ -1,6 +1,10 @@
 # SRE Conference Lab - Learn how to deploy and upgrade a logs system
 
-此 Lab 是為了讓剛進入職場的 SRE 工程師能夠快速掌握 Terraform 及 EFK debug 流程而設計的。Lab 中模擬作者實際在職場上遇到必須將 EFK 進行升級時遇到的問題復現出來。
+此 Lab 是為了讓剛進入職場的 SRE 工程師能夠快速掌握 Terraform 及 EFK debug 流程而設計的。Lab 中模擬作者實際在職場上遇到必須將 EFK 進行升級時遇到的問題復現出來。其中包含了
+20% Terrform 應用
+20% EFK debug 
+30% EKS TLS 概念
+30% 升級時注意事項
 
 ## Prerequisites
 
@@ -44,13 +48,13 @@ You can use ./utilities/check_requirements.sh to check if your settings match th
 
 ## Initialize the lab
 
-1. Rewrite the "owner" and "region" variable tag in the `variables.tfvars` file.
+1. Rewrite the "owner" and "region" variable tag in the `variables.tf` file.
 2. Run the following script file, which will build a new EKS cluster and deploy the applications required for the lab:
 
 ```
-./utilities/init.sh
+./init.sh
 or
-AWS_PROFILE=test ./utilities/init.sh
+AWS_PROFILE=test ./init.sh
 ```
 
 
@@ -90,6 +94,15 @@ kubectl -n kube-system port-forward <kibana pod name> 8080:5601
 
 ### Check Points
 1. Only 404 errors can be found in Kibana.
+
+## Task 3: Learn how to deprecated the outdated technology/config
+
+### Your target
+1. The current ElasticSearch and kibana version is 7.17.3. It is recommended to upgrade it to 8.5.1.
+2. An important reminder for ElasticSearch version 8.5.1 is that certificates can be auto-created. Therefore, you may need to adjust some settings related to TLS connections.
+
+### Check Points
+1. By using the command `helm list -n kube-system`, you can see that both ElasticSearch and Kibana versions are 8.5.1.
 
 ## Clean up the lab
 ```
