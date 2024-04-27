@@ -108,7 +108,7 @@ cloudWatch:
   #   ...
 
 cloudWatchLogs:
-  enabled: true
+  enabled: false
   match: "*"
   region: "ap-northeast-1"
   logGroupName: "/aws/eks/fluentbit-cloudwatch/logs"
